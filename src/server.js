@@ -40,9 +40,14 @@ const main_app = async () => {
     // Get all surveys from API Token
     const surveys = await helper.getSurveys()
 
+    let counter = 0
+    let surveys_length  = Object.keys(surveys.elements).length    
+    console.log(`Found [${chalk.magenta(surveys_length)}] surveys`)
+    console.log("")
+
     //Loop through surveys and save structure and response data in folder surveys
     for await (const survey of surveys.elements) {
-        console.log(`Survey ID [${survey.id}] | ${survey.name}`)
+        console.log(`[${++counter}/${surveys_length}] ID [${survey.id}] | ${survey.name}`)
 
         // Save survey structor as json
         await helper.saveSurveyJSON(survey)

@@ -8,5 +8,10 @@ services:
       context: ./
     env_file:
       - .env
+    volumes:
+    - ./surveys:/surveys
     ports:
       - 4400:4400
+
+volumes:
+  surveys:
