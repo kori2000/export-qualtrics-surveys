@@ -11,8 +11,10 @@ Please adjust the .env file before starting the Container.
 ```bash
 # Replace .ent.test with .env to work in prod enviroment
 
-# Server Settings
-SERVER_PORT=4400
+# Settings
+DATACENTER_ID=fra1
+API_TOKEN=YOUR_TOKEN_ID
+API_URL=https://fra1.qualtrics.com/API/v3
 ```
 
 ## Starting

@@ -1,101 +1,61 @@
-const path = require("path")
-const moment = require('moment')
+const chalk = require('chalk')
 
-const http = require('http')
-const express = require('express')
-const app = express()
-
-// Access Origin
-app.use(function(req, res, next) {
-
-    // const allowedOrigins = ['http://localhost:4200', 'http://192.168.178.40:4200'];
-    // const origin = req.headers.origin;
-    // if (allowedOrigins.includes(origin)) {
-    //     res.setHeader('Access-Control-Allow-Origin', origin);
-    // }
-    // res.header("Access-Control-Allow-Origin", "http://localhost:4200", "http://192.168.178.40:4200")
-    res.setHeader("Access-Control-Allow-Origin", '*')
-    res.setHeader("Access-Control-Allow-Methods", "PUT, GET, POST, DELETE, OPTIONS")    
-    res.setHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers")
-    next()
-})
-app.disable('x-powered-by')
-
-// Public Static File Folder
-let public_folder = path.join(__dirname, '..', '/public/')
-app.use(express.static(public_folder))
-
-const server = http.createServer(app)
+const helper = require('./helper.js')
 
 // Enviroment Data
 const dotenv = require('dotenv')
 dotenv.config()
 
-const SERVER_PORT = process.env.SERVER_PORT || 4400
+/**
+ * ------------------------------
+ * Qualtics Settings
+ * ------------------------------
+ */
+const API_TOKEN = process.env.API_TOKEN
+const API_URL = process.env.API_URL
 
 /**
  * ------------------------------
- * API Routes
+ * Application
  * ------------------------------
  */
 
-// Dasboard HTML Page
-app.get("/", async (req, res) => {    
-    res.setHeader('Content-Type', 'text/html')
-    res.status(200).sendFile(`index.html`)
-})
+const intro = async () => {
+    console.clear()
+    console.log(chalk.blue("* * * * * * * * * * * * * * *"))
+    console.log(chalk.yellow(' Qualtics Survey Downloader'))
+    console.log(chalk.blue("* * * * * * * * * * * * * * *"))
+    console.log()
 
-// Return some data
-app.get("/someData", async (req, res) => {
-    res.setHeader('Content-Type', 'application/json')
+    console.log(chalk.green("API TOKEN :"), chalk.red(API_TOKEN))
+    console.log(chalk.green("API URL   :"), chalk.red(API_URL))
+    console.log()
+}
+
+const main_app = async () => {
+
+    // Common Information
+    await intro()
+
+    // Get all surveys from API Token
+    const surveys = await helper.getSurveys()
+
+    //Loop through surveys and save structure and response data in folder surveys
+    for await (const survey of surveys.elements) {
+        console.log(`Survey ID [${survey.id}] | ${survey.name}`)
+
+        // Save survey structor as json
+        await helper.saveSurveyJSON(survey)
+
+        // Save surves response zipped file as csv
+        await helper.saveSurveyEXPORT(survey)
+    }
     
-    let dummyFoodStores = [ 
-            { 
-                id: 1,
-                foodStore: "Casino",
-                location: {
-                    lon: "123.123",
-                    lat: "456.456"
-                },
-                favorite: true,
-                lastVisite: "2022-30-03"     
-            },
-            { 
-                id: 2,
-                foodStore: "Dori, Dori",
-                location: {
-                    lon: "123.123",
-                    lat: "456.456"
-                },
-                favorite: true,
-                lastVisite: "2022-29-03"     
-            },
-            { 
-                id: 3,
-                foodStore: "Chipo",
-                location: {
-                    lon: "123.123",
-                    lat: "456.456"
-                },
-                favorite: false,
-                lastVisite: "2022-28-03"     
-            },
-        ]
+    // Done
+    console.log("")
+    console.log(chalk.green("Done. Bye, bye..."))
+    console.log("")
+}
 
-    console.log("RESULT BACK TO..:", req.headers.host);
-
-    res.status(200).send(JSON.stringify(dummyFoodStores))
-})
-
-/**
- * ------------------------------
- * Server Settings
- * ------------------------------
- */
- server.listen(SERVER_PORT, () => {
-    console.log("-------------------------------")
-    console.log("  API started")
-    console.log("----------------+--------------")
-    console.log(`| SERVER PORT...:`, SERVER_PORT)
-    console.log("----------------+--------------\n")
-})
+// Init Application
+main_app()
