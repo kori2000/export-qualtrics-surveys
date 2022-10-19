@@ -9,7 +9,7 @@ services:
     env_file:
       - .env
     volumes:
-    - ./surveys:/surveys
+    - ./surveys:/usr/src/app/surveys
     ports:
       - 4400:4400
 

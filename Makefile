@@ -1,8 +1,6 @@
 build:
 	docker-compose build
 up:
-	docker-compose up -d
-	sleep 3
-	docker logs app-cnt
+	docker-compose up
 down:
 	docker-compose down

@@ -47,7 +47,7 @@ const _sleep = async (ms) => {
 }
 
 const _initExport = async (survey) => {
-    const DATA = { "format": "csv" }
+    const DATA = { "format": "tsv", "useLabels": "true" }
 
     return new Promise((resolve, reject) => {
         axios.post(`${API_URL}/surveys/${survey.id}/export-responses`, DATA, OPTIONS).then(response => {

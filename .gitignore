@@ -104,5 +104,3 @@ dist
 .tern-port
 
 # Custom
-surveys/*
-surveys/.gitkeep 
