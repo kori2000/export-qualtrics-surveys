@@ -10,18 +10,36 @@ dotenv.config()
 
 const API_TOKEN = process.env.API_TOKEN
 const API_URL = process.env.API_URL
+const DOWNLOAD_TIMER_MS = process.env.DOWNLOAD_TIMER_MS
 
 const OPTIONS = { headers: {'Content-Type': 'application/json', 'X-API-TOKEN': API_TOKEN} }
 
-const getSurveys = () => {    
-    console.log("Retrieving all surveys from API TOKEN...")
+const getSurveys = async (offset) => {
+    console.log("Retrieve surveys | ", offset)
     return new Promise((resolve, reject) => {
-        axios.get(`${API_URL}/surveys`, OPTIONS).then(response => {
-            resolve(response.data.result)
+        axios.get(`${API_URL}/surveys?${offset}`, OPTIONS).then(response => {
+            resolve(response.data)
         }).catch(err => {
             reject(err)
         })
     })
+}
+
+const getAllSurveys = async (offset) => {
+    let surveysDataStructure = await getSurveys(offset)
+    let surveysData = surveysDataStructure.result.elements
+    let offset_url = ''
+    try {
+        //console.log("OFFSET : ", surveysDataStructure.result.nextPage)
+        offset_url = surveysDataStructure.result.nextPage.split("?")[1]
+    } catch (error) {}
+
+    if (offset_url != "" ) {
+        //console.log("RECALL : ", offset_url)
+        return surveysData.concat( await getAllSurveys(offset_url) )
+    } else {        
+        return surveysData
+    }
 }
 
 const saveSurveyJSON = async (survey) => {
@@ -105,7 +123,9 @@ const saveSurveyEXPORT = async (survey) => {
 
     // Init survey response export process => returns progressID
     const progressID = await _initExport(survey)    
-    await _sleep(4000)
+    
+    // Wait until file export finished
+    await _sleep(DOWNLOAD_TIMER_MS)
 
     // Wait to export survey response => return fileID
     const fileID = await _retriveFileID(survey, progressID)
@@ -119,7 +139,7 @@ const saveSurveyEXPORT = async (survey) => {
 }
 
 module.exports = {
-    getSurveys,
+    getAllSurveys,
     saveSurveyJSON,
     saveSurveyEXPORT,
     _sleep

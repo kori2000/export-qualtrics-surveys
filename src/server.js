@@ -13,7 +13,6 @@ dotenv.config()
  */
 const API_TOKEN = process.env.API_TOKEN
 const API_URL = process.env.API_URL
-
 /**
  * ------------------------------
  * Application
@@ -38,22 +37,33 @@ const main_app = async () => {
     await intro()
 
     // Get all surveys from API Token
-    const surveys = await helper.getSurveys()
+    // const surveys = await helper.getSurveys()
+    const surveys = await helper.getAllSurveys("")
+
+    await helper._sleep(3000)
 
     let counter = 0
-    let surveys_length  = Object.keys(surveys.elements).length    
+    let surveys_length  = Object.keys(surveys).length    
     console.log(`Found [${chalk.magenta(surveys_length)}] surveys`)
     console.log("")
 
     //Loop through surveys and save structure and response data in folder surveys
-    for await (const survey of surveys.elements) {
+    for await (const survey of surveys) {
         console.log(`[${++counter}/${surveys_length}] ID [${survey.id}] | ${survey.name}`)
 
-        // Save survey structor as json
-        await helper.saveSurveyJSON(survey)
+        try {
+            // Save survey structor as json
+            await helper.saveSurveyJSON(survey)
 
-        // Save surves response zipped file as csv
-        await helper.saveSurveyEXPORT(survey)
+            // Save surves response zipped file as csv
+            await helper.saveSurveyEXPORT(survey)
+            
+        } catch (error) {
+            console.error(`FAILED [${counter}/${surveys_length}] ID [${survey.id}] | ${survey.name}`)
+            console.log("SKIPPING...")
+            console.log("")
+        }
+
     }
     
     // Done
