@@ -15,6 +15,9 @@ const DOWNLOAD_TIMER_MS = process.env.DOWNLOAD_TIMER_MS
 const OPTIONS = { headers: {'Content-Type': 'application/json', 'X-API-TOKEN': API_TOKEN} }
 
 const getSurveys = async (offset) => {
+
+    // API Info: https://api.qualtrics.com/2c55b7ff8b0c7-list-surveys
+
     console.log("Retrieve surveys | ", offset)
     return new Promise((resolve, reject) => {
         axios.get(`${API_URL}/surveys?${offset}`, OPTIONS).then(response => {
@@ -120,6 +123,8 @@ const _saveZippedCSVFile = async (survey, fileID) => {
 }
 
 const saveSurveyEXPORT = async (survey) => {
+
+    // API Info: https://api.qualtrics.com/41296b6f2e828-get-response-export-file
 
     // Init survey response export process => returns progressID
     const progressID = await _initExport(survey)    
